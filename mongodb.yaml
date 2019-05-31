@@ -8,7 +8,7 @@ spec:
   ports:
   - port: 27017
     targetPort: 27017
-  clusterIP: None
+  #clusterIP: None
   selector:
     role: mongo
 ---
@@ -45,7 +45,7 @@ spec:
         - name: mongod-container
           #image: pkdone/mongo-ent:3.4
           image: mongo
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
           - name: STATEFULSET_NAME
             valueFrom:
@@ -57,7 +57,7 @@ spec:
           - name: MONGO_USER
             value: "admin"
           - name: MONGO_PASSWORD
-            value: "abc123changeme"
+            value: "opensds123"
           command:
             - "bash"
             - "-c"
@@ -123,12 +123,12 @@ spec:
   - metadata:
       name: mongodb-persistent-storage-claim
       annotations:
-        volume.beta.kubernetes.io/storage-class: "fast"
+        volume.beta.kubernetes.io/storage-class: "csi-sc-opensdsplugin"
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 500Mi
+          storage: 1Gi
 # ---
 # Google cloud
 # kind: StorageClass
@@ -155,8 +155,21 @@ spec:
 #     pdName: pd-ssd-disk-INST
 ---
 # Local storage
+#kind: StorageClass
+#apiVersion: storage.k8s.io/v1beta1
+#metadata:
+#  name: fast
+#provisioner: k8s.io/minikube-hostpath
+
+apiVersion: storage.k8s.io/v1
 kind: StorageClass
-apiVersion: storage.k8s.io/v1beta1
 metadata:
-  name: fast
-provisioner: k8s.io/minikube-hostpath
+  name: csi-sc-opensdsplugin
+provisioner: csi-opensdsplugin
+parameters:
+  attachMode: rw
+allowedTopologies:
+- matchLabelExpressions:
+  - key: topology.csi-opensdsplugin/zone
+    values:
+    - default
