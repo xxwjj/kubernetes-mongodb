@@ -8,7 +8,7 @@ spec:
   ports:
   - port: 27017
     targetPort: 27017
-  #clusterIP: None
+  clusterIP: None
   selector:
     role: mongo
 ---
@@ -25,6 +25,7 @@ spec:
         role: mongo
         environment: test
         replicaset: MainRepSet
+        name: mongo
     spec:
       affinity:
         # This is to prevent mongodb replicas from ending up on the same
@@ -57,7 +58,7 @@ spec:
           - name: MONGO_USER
             value: "admin"
           - name: MONGO_PASSWORD
-            value: "opensds123"
+            value: "123456"
           command:
             - "bash"
             - "-c"
@@ -168,6 +169,7 @@ metadata:
 provisioner: csi-opensdsplugin
 parameters:
   attachMode: rw
+  profile: 15174bca-3865-4746-849d-f5016526dac2
 allowedTopologies:
 - matchLabelExpressions:
   - key: topology.csi-opensdsplugin/zone
